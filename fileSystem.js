@@ -21,7 +21,6 @@ class FileSystem{
     async addToCart(obj, id){
         try {
             const data = JSON.parse(await fs.promises.readFile(this.url, 'utf-8'));
-
             obj.id = data.find(c => c.id == id).products.length + 1;
             data.find(c => c.id == id).products.push(obj);
             await fs.promises.writeFile(this.url, JSON.stringify(data, null, 2));

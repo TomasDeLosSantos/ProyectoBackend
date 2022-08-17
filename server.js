@@ -1,14 +1,45 @@
 const express = require('express');
 const fileSystem = require('./fileSystem');
+const MongoProduct = require('./DAOs/MongoProduct');
+const MongoCart = require('./DAOs/MongoCart');
+const FirebaseProduct = require('./DAOs/FirebaseProduct');
+const FirebaseCart = require('./DAOs/FirebaseCart');
+
+if(process.env.NODE_ENV != 'production'){
+    require('dotenv').config();
+}
+
 const { Router } = express;
 const app = express();
-// const router = Router();
 const productRouter = Router();
 const cartRouter = Router();
 const PORT = process.env.PORT || 8080;
 
-const data = new fileSystem('./products.txt');
-const cart = new fileSystem('./cart.txt');
+
+
+let data;
+let cart;
+
+switch(process.env.PERSISTANCE){
+    case 'local':
+        data = new fileSystem('./products.txt');
+        cart = new fileSystem('./cart.txt');
+        break;
+    case 'mongo':
+        data = new MongoProduct();
+        cart = new MongoCart();
+        break;
+    case 'firebase':
+        data = new FirebaseProduct();
+        cart = new FirebaseCart();
+        break;
+    default: 
+        data = new fileSystem('./products.txt');
+        cart = new fileSystem('./cart.txt');
+        break;
+}
+
+
 
 let admin = true;
 
@@ -25,7 +56,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 app.use('/static', express.static(__dirname + '/public'));
 
-// app.use('/api', router);
 app.use('/api/products', productRouter);
 app.use('/api/cart', cartRouter);
 
@@ -114,7 +144,6 @@ cartRouter.delete('/:id/products/:id__prod', async (req, res) => {
         console.error(error);
     }
 })
-
 
 
 app.listen(PORT, () => {
