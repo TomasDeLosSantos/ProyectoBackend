@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const CartModel = {
-    id: {type: Number, required: true},
+    id: {type: String, required: true},
     timestamp: {type: String, required: true},
     products: {type: Array, required: true}
 }
@@ -8,7 +8,7 @@ const CartModel = {
 
 class MongoCart {
     constructor(){
-        this.connection = mongoose.connect('mongodb+srv://tomas:tomasmongo1234@cluster0.zjndnkl.mongodb.net/?retryWrites=true&w=majority', {
+        this.connection = mongoose.connect('mongodb+srv://tomas:tomasmongo1234@cluster0.zjndnkl.mongodb.net/ecommerce?retryWrites=true&w=majority', {
             useNewUrlParser: true,
             useUnifiedTopology: true
         })
@@ -20,7 +20,6 @@ class MongoCart {
     async save(obj){
         try {
             const data = await this.cart.find({});
-            obj.id = data.length + 1;
             await this.cart.create(obj);
             return obj.id;
         } catch (error) {
@@ -30,9 +29,12 @@ class MongoCart {
 
     async addToCart(obj, id){
         try {
-            const cart = this.cart.find({id: id});
-            obj.id = cart.products.length + 1;
-            return await this.cart.updateOne({id: id}, {$set: {products: cart.products.push(obj)}});
+            const userCart = await this.cart.find({id: id});
+            // console.log(cart[0]);
+            const userProd = userCart[0].products;
+            obj.id = userProd.length + 1;
+            await this.cart.updateOne({id: id}, {$set: {products: [...userProd, obj]}});
+            return obj.title;
         } catch (error) {
             console.log(error);
         }
@@ -40,8 +42,10 @@ class MongoCart {
 
     async deleteFromCart(id, id__prod){
         try {
-            const cart = this.cart.find({id: id});
-            return await this.cart.updateOne({id: id}, {$set: {products: cart.products.filter(o => o.id != id__prod)}});
+            const userCart = await this.cart.find({id: id});
+            const delItem = userCart[0].products.find(i => i.id == id__prod);
+            await this.cart.updateOne({id: id}, {$set: {products: userCart[0].products.filter(o => o.id != id__prod)}});
+            return delItem.title;
         } catch (error) {
             console.log(error);
         }

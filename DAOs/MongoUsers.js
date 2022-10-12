@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
-const ProductModel = {
-    id: {type: Number, required: true},
-    title: {type: String, required: true},
-    price: {type: Number, required: true},
-    img: {type: String, required: true},
+const UserModel = {
+    email: {type: String},
+    password: {type: String},
+    name: {type: String},
+    address: {type: String},
+    age: {type: Number},
+    phone: {type: Number}
 }
-
 
 class MongoProduct {
     constructor(){
@@ -13,17 +14,17 @@ class MongoProduct {
             useNewUrlParser: true,
             useUnifiedTopology: true
         })
-        this.model = new mongoose.Schema(ProductModel);
-        this.product = mongoose.model('books', this.model);
+        this.model = new mongoose.Schema(UserModel);
+        this.product = mongoose.model('users', this.model);
     }
 
 
     async save(obj){
         try {
-            const data = await this.product.find({});
-            obj.id = data.length + 1;
+            //const data = await this.product.find({});
+            // obj.id = data.length + 1;
             await this.product.create(obj);
-            return obj.id;
+            return obj;
         } catch (error) {
             console.log(error);
         }
@@ -31,7 +32,15 @@ class MongoProduct {
 
     async getById(id){
         try {
-            return await this.product.find({id: id});
+            return await this.product.find({_id: id});
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async getByEmail(email){
+        try {
+            return await this.product.find({email: email});
         } catch (error) {
             console.log(error);
         }
@@ -39,7 +48,7 @@ class MongoProduct {
 
     async getAll(){
         try {
-            return await this.product.find({});
+            return await this.product.find({result: 0});
         } catch (error) {
             console.log(error);
         }
@@ -63,10 +72,15 @@ class MongoProduct {
     }
 
     async update(id, obj){
-        let { title, price, img } = obj;
         try {
-            await this.product.updateOne({id: id}, {$set: {title: title, price: price, img: img}});
-            return obj;
+            let prod = await this.getAll();
+            if(prod[0].result == 0){
+                return await this.product.updateOne({result: id}, {$set: {entities: obj.entities}});
+            } else {
+                obj.id = id;
+                await this.product.create(obj);
+                return obj.id;
+            }
         } catch (error) {
             console.log(error);
         }
