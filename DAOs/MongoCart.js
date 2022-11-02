@@ -8,7 +8,7 @@ const CartModel = {
 
 class MongoCart {
     constructor(){
-        this.connection = mongoose.connect('mongodb+srv://tomas:tomasmongo1234@cluster0.zjndnkl.mongodb.net/ecommerce?retryWrites=true&w=majority', {
+        this.connection = mongoose.connect(process.env.MONGO_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         })
@@ -32,8 +32,17 @@ class MongoCart {
             const userCart = await this.cart.find({id: id});
             // console.log(cart[0]);
             const userProd = userCart[0].products;
-            obj.id = userProd.length + 1;
-            await this.cart.updateOne({id: id}, {$set: {products: [...userProd, obj]}});
+
+            if(userProd.find(b => b.title == obj.title) !== undefined){
+                let index = userProd.findIndex(b => b.title == obj.title);
+                userProd[index].quant += obj.quant;
+                await this.cart.updateOne({id: id}, {$set: {products: userProd}});
+            } else{
+                obj.id = userProd.length + 1;
+                obj.quant = 1;
+                await this.cart.updateOne({id: id}, {$set: {products: [...userProd, obj]}});
+            }
+
             return obj.title;
         } catch (error) {
             console.log(error);
@@ -80,6 +89,14 @@ class MongoCart {
     async deleteAll(){
         try {
             return await this.cart.collection.drop();
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    async deleteAllProducts(id){
+        try {
+            return await this.cart.updateOne({id: id}, {$set: {products: []}});
         } catch (error) {
             console.log(error);
         }
