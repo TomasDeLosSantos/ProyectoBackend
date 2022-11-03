@@ -9,6 +9,7 @@ const { authRouter } = require('./routers/auth');
 const { productRouter } = require('./routers/product');
 const { cartRouter } = require('./routers/cart');
 const { orderRouter } = require('./routers/order');
+const { mailRouter } = require('./routers/mail');
 const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
@@ -17,7 +18,7 @@ app.use(express.static('public'));
 app.use('/static', express.static(__dirname + '/public'));
 app.use(session({
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
-    secret: "shhhhhhhhhhhhhhhhhhhhh",
+    secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false,
     rolling: true,
@@ -30,6 +31,7 @@ app.use('/auth', authRouter);
 app.use('/api/products', productRouter);
 app.use('/api/cart', cartRouter);
 app.use('/api/order', orderRouter);
+app.use('/api/mail', mailRouter);
 
 app.listen(PORT, () => {
     console.log(`Server Running at ${PORT}`);
