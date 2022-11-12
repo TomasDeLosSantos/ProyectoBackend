@@ -21,8 +21,9 @@ const { mailRouter } = require('./routers/mail');
 const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
+app.use(express.static('public'));
+app.use('/static', express.static(__dirname + '/public'));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname + '/public')));
 app.use(session({
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
     secret: process.env.SECRET,
