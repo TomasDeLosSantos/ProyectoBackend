@@ -5,6 +5,18 @@ if (process.env.NODE_ENV != 'production') {
 }
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const MongoMessages = require('./DAOs/MongoMessages');
+const mongoMessages = new MongoMessages();
+const cors = require('cors');
+const { Server: HttpServer} = require('http');
+const { Server: Socket} = require('socket.io');
+const httpServer = new HttpServer(app);
+const io = new Socket(httpServer, {
+    cors: {
+        origin: 'http://localhost:3000',
+        methods:    ['GET', 'POST']
+    }
+});
 const { authRouter } = require('./routers/auth');
 const { productRouter } = require('./routers/product');
 const { cartRouter } = require('./routers/cart');
@@ -33,6 +45,26 @@ app.use('/api/cart', cartRouter);
 app.use('/api/order', orderRouter);
 app.use('/api/mail', mailRouter);
 
-app.listen(PORT, () => {
+io.on('connection', async socket => {
+    console.log("New client conected");
+    socket.emit('messages', await mongoMessages.getAll());
+
+    socket.on('message', async msg => {
+        await mongoMessages.save(msg);
+        io.sockets.emit('messages', await mongoMessages.getAll());
+    })
+
+    socket.on('getMessages', async () => {
+        io.sockets.emit('messages', await mongoMessages.getAll());
+    })
+
+    socket.on('disconnect', () => console.log("User disconected") )
+})
+
+app.use('/api/chat', async (req, res) => {
+    res.json(await mongoMessages.getAll());
+})
+
+httpServer.listen(PORT, () => {
     console.log(`Server Running at ${PORT}`);
 })

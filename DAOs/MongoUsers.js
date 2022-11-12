@@ -24,7 +24,7 @@ class MongoProduct {
             //const data = await this.product.find({});
             // obj.id = data.length + 1;
             await this.product.create(obj);
-            return obj;
+            return obj.email;
         } catch (error) {
             console.log(error);
         }

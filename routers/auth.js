@@ -4,6 +4,7 @@ const { Router } = express;
 const { getLogged, getLogout, postLogin, postRegister, mongoUsers } = require("../controllers/auth");
 const bcrypt = require('bcryptjs');
 const LocalStrategy = require('passport-local').Strategy;
+const {cart} = require('../controllers/cart');
 
 // PASSPORT
 const passwordCheck = (user, password) => {
@@ -28,6 +29,7 @@ passport.use('login', new LocalStrategy(
 passport.use('signup', new LocalStrategy({
     passReqToCallback: true
 }, async (req, username, password, done) => {
+    console.log(username);
     let user = await mongoUsers.getByEmail(username);
     if (user[0] != undefined) {
         console.log('User Already Exists');

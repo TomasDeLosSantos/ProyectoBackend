@@ -56,4 +56,4 @@ const cartDeleteAllProducts = async (req, res) => {
     }
 }
 
-module.exports = { cartPost, cartDelete, cartGetProducts, cartPostProducts, cartDeleteProducts, cartDeleteAllProducts }
+module.exports = { cart, cartPost, cartDelete, cartGetProducts, cartPostProducts, cartDeleteProducts, cartDeleteAllProducts }
