@@ -11,12 +11,7 @@ const cors = require('cors');
 const { Server: HttpServer} = require('http');
 const { Server: Socket} = require('socket.io');
 const httpServer = new HttpServer(app);
-const io = new Socket(httpServer, {
-    cors: {
-        origin: 'http://localhost:3000',
-        methods:    ['GET', 'POST']
-    }
-});
+const io = new Socket(httpServer);
 const { authRouter } = require('./routers/auth');
 const { productRouter } = require('./routers/product');
 const { cartRouter } = require('./routers/cart');
