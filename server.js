@@ -3,6 +3,7 @@ const app = express();
 if (process.env.NODE_ENV != 'production') {
     require('dotenv').config();
 }
+const path = require('path');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const MongoMessages = require('./DAOs/MongoMessages');
@@ -11,7 +12,12 @@ const cors = require('cors');
 const { Server: HttpServer} = require('http');
 const { Server: Socket} = require('socket.io');
 const httpServer = new HttpServer(app);
-const io = new Socket(httpServer);
+const io = new Socket(httpServer, {
+    cors: {
+        origin: 'http://localhost:3000',
+        methods:    ['GET', 'POST']
+    }
+});
 const { authRouter } = require('./routers/auth');
 const { productRouter } = require('./routers/product');
 const { cartRouter } = require('./routers/cart');
@@ -21,8 +27,7 @@ const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
-app.use('/static', express.static(__dirname + '/public'));
+app.use(express.static(path.join(__dirname + '/public')));
 app.use(session({
     store: MongoStore.create({ mongoUrl: process.env.MONGO_URL }),
     secret: process.env.SECRET,
