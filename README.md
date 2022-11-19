@@ -1,4 +1,4 @@
-# ProyectoBackend
+# Ecommerce con Express y React
 Haciendo uso del stack de desarrollo MERN, el proyecto cuenta con las siguientes características:
 <ul>
   <li>Desarrollo de API REST con Express</li>
